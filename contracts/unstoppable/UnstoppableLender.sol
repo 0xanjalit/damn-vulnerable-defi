@@ -34,13 +34,14 @@ contract UnstoppableLender is ReentrancyGuard {
 
         // Ensured by the protocol via the `depositTokens` function
         assert(poolBalance == balanceBefore);
-        
+        /// @audit poolBalance is balance added thru depositTokens function, tho balanceBefore is balance of this contract,
+        /// @notice can easily break the invariant by tranfering DVT to this contract and make flashLoan unusable
+
         damnValuableToken.transfer(msg.sender, borrowAmount);
-        
+
         IReceiver(msg.sender).receiveTokens(address(damnValuableToken), borrowAmount);
-        
+
         uint256 balanceAfter = damnValuableToken.balanceOf(address(this));
         require(balanceAfter >= balanceBefore, "Flash loan hasn't been paid back");
     }
-
 }
